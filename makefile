@@ -1,5 +1,12 @@
-build:
-	@docker build -t chitty-chat .
+chitty-server-build:
+	@docker build -t chitty-server -f DockerfileServer .
 
-run:
-	@docker run chitty-chat
+chitty-server-run:
+	@docker run chitty-server
+
+chitty-client-build:
+	@docker build -t chitty-client -f DockerfileClient .
+
+chitty-client-run:
+	@docker run chitty-client
+
