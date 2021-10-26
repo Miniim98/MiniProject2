@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	pb "../Chat"
+	pb "github.itu.dk/jard/Miniproject2.git/Chat"
 	"google.golang.org/grpc"
 )
 
