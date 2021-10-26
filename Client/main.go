@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
+	//"net"
+
+	pb "github.itu.dk/jard/Miniproject2.git/Chat"
 	"google.golang.org/grpc"
 )
 
@@ -14,5 +18,6 @@ func main() {
 	}
 	defer conn.Close()
 
-	c := pb.chittychatClient(conn)
+	c := pb.NewChittychatClient(conn)
+	fmt.Println("Connected")
 }

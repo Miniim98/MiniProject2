@@ -1,4 +1,4 @@
-module github.itu.dk/jard/Miniproject2.git/Chat
+module github.itu.dk/jard/Miniproject2.git
 
 go 1.17
 
