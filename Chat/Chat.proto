@@ -1,17 +1,17 @@
 syntax = "proto3";
 package Chat;
 
-option go_package = "https://github.itu.dk/jard/Miniproject2/Chat";
+option go_package = "https://github.itu.dk/jard/Miniproject2.git/Chat";
 
 service Chittychat{
-    rpc Broadcast(BroadcastRequest) returns BroadcastResponse{}
-    rpc Publish(PublishRequest) returns PublishResponse{}
-    rpc Connect(ConnectionRequest) returns ConnectionResponse{}
-    rpc DisConnect(){}
+    rpc Broadcast(BroadcastRequest) returns (BroadcastResponse){}
+    rpc Publish(PublishRequest) returns (PublishResponse){}
+    rpc Connect(ConnectionRequest) returns (ConnectionResponse){}
+   
 }
 
 message ConnectionRequest {
-    String userName = 1;
+    string userName = 1;
 }
 
 message ConnectionResponse {
@@ -20,7 +20,7 @@ message ConnectionResponse {
 }
 
 message BroadcastRequest {
-    String message = 1;
+    string message = 1;
     LamportTimeStamp timestamp = 2;
 }
 
@@ -30,7 +30,7 @@ message BroadcastResponse {
 }
 
 message PublishRequest {
-    String message = 1;
+    string message = 1;
     LamportTimeStamp timestamp = 2;
 }
 
