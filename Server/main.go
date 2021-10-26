@@ -4,13 +4,14 @@ import (
 	"log"
 	"net"
 
-	pb "github.itu.dk/jard/Miniproject2.git/Chat"
+	pb "../Chat"
 	"google.golang.org/grpc"
 )
 
 type server struct {
-	string net.UnknownNetworkError
-	string port
+	network   string
+	port      string
+	timestamp int32
 	pb.UnimplementedChittychatServer
 }
 
@@ -22,7 +23,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	ft.RegisterTimeServiceServer(grpcServer, &server{})
+	pb.RegisterChittychatServer(grpcServer, &server{})
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve gRPC server over port 8008: %v", err)
