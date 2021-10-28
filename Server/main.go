@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net"
 
-	pb "github.itu.dk/jard/Miniproject2.git/Chat"
+	pb "github.com/Miniim98/MiniProject2/Chat"
 	"google.golang.org/grpc"
 )
 
@@ -14,6 +16,15 @@ type server struct {
 	timestamp int32
 	pb.UnimplementedChittychatServer
 }
+
+func (s *server) Connect(ctx context.Context, in *pb.ConnectionRequest) (*pb.ConnectionResponse, error){
+	fmt.Println("Connect request recived from " + in.UserName)
+
+	return &pb.ConnectionResponse{Succeded: true, Timestamp: &pb.LamportTimeStamp{Events: 1}}, nil
+}
+
+
+
 
 func main() {
 	//We listen on port 8008:
