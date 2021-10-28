@@ -1,7 +1,7 @@
 syntax = "proto3";
 package Chat;
 
-option go_package = "https://github.itu.dk/jard/Miniproject2.git/Chat";
+option go_package = "https://"github.com/Miniim98/MiniProject2/Chat"";
 
 service Chittychat{
     rpc Broadcast(BroadcastRequest) returns (BroadcastResponse){}

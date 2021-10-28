@@ -1,14 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	//"net"
 
-	pb "github.itu.dk/jard/Miniproject2.git/Chat"
+	pb "github.com/Miniim98/MiniProject2/Chat"
 	"google.golang.org/grpc"
 )
+
+var name string
 
 func main() {
 	var conn *grpc.ClientConn
@@ -19,6 +22,17 @@ func main() {
 	defer conn.Close()
 
 	c := pb.NewChittychatClient(conn)
+	SendConnectRequest(c)
 	fmt.Println("Connected")
+}
+
+func SendConnectRequest(c pb.ChittychatClient) {
+	fmt.Println("Choose a username")
+	fmt.Scanln(&name)
+	response, err := c.Connect(context.Background(), &pb.ConnectionRequest{UserName: name})
+	if err != nil {
+		fmt.Printf("Failure trying to call Connect %s" , err)
+		fmt.Println(response)
+	}
 
 }
