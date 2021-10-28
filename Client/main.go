@@ -20,4 +20,5 @@ func main() {
 
 	c := pb.NewChittychatClient(conn)
 	fmt.Println("Connected")
+
 }
