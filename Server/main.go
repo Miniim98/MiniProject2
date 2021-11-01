@@ -61,16 +61,6 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 	for {
 		msg := <-s.ch
 		for _, c := range clients {
-			if c.stream_out == nil {
-				for _, c2 := range clients {
-					if c != c2 {
-						err := c2.stream_out.Send(&pb.BroadcastResponse{Message: c.username + " left the chat \n", Timestamp: &pb.LamportTimeStamp{Events: 1}})
-						if err != nil {
-							fmt.Printf("Error when sending message to %v Error : %v", c.username, err)
-						}
-					}
-				}
-			}
 			err := c.stream_out.Send(&pb.BroadcastResponse{Message: msg, Timestamp: &pb.LamportTimeStamp{Events: 1}})
 			if err != nil {
 				fmt.Printf("Error when sending message to %v Error : %v", c.username, err)
