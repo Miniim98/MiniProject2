@@ -34,7 +34,7 @@ func (s *server) Publish(stream pb.Chittychat_PublishServer) error {
 	//Streaming clientside to recived publish
 	for {
 		msg, err := stream.Recv()
-
+		//Saving the stream_in
 		for i := 0; i < len(clients); i++ {
 			if clients[i].username == msg.UserName {
 				clients[i].stream_in = stream
@@ -49,11 +49,13 @@ func (s *server) Publish(stream pb.Chittychat_PublishServer) error {
 }
 
 func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_BroadcastServer) error {
+	//Saving the stream_out to the right client
 	for i := 0; i < len(clients); i++ {
 		if clients[i].username == in.UserName {
 			clients[i].stream_out = stream
 		}
 	}
+	//When client is connected this is broadcasted to all connected clients
 	for _, c := range clients {
 		c.stream_out.Send(&pb.BroadcastResponse{Message: in.UserName + " has joined the chat", Timestamp: &pb.LamportTimeStamp{Events: 1}})
 	}
