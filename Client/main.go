@@ -92,3 +92,8 @@ func SendBroadcastRequest(c pb.ChittychatClient) {
 		fmt.Println(response.Message + " at lamporttime " + response.Timestamp.String())
 	}
 }
+
+func SendLeaveRequest(client pb.ChittychatClient) {
+	stream, err := client.Leave(context.Background(), &pb.LeaveRequest{UserName: name, Timestamp: &pb.LamportTimeStamp{Events: 1}})
+	if (err != nill)
+}
