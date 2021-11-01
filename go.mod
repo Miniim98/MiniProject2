@@ -1,4 +1,4 @@
-module MiniProject2
+module github.com/Miniim98/MiniProject2
 
 go 1.17
 

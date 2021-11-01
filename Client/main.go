@@ -10,8 +10,7 @@ import (
 
 	//"net"
 
-	pb "MiniProject2/Chat"
-
+	pb "github.com/Miniim98/MiniProject2/Chat"
 	"google.golang.org/grpc"
 )
 
