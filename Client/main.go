@@ -10,7 +10,8 @@ import (
 
 	//"net"
 
-	pb "github.com/Miniim98/MiniProject2/Chat"
+	pb "MiniProject2/Chat"
+
 	"google.golang.org/grpc"
 )
 
@@ -22,6 +23,7 @@ func main() {
 	flag.Parse()
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock(), grpc.WithInsecure())
+
 	conn, err := grpc.Dial(*tcpServer, opts...)
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
