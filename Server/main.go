@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 	"net"
-	"sync"
 	"os"
+	"sync"
 
 	pb "github.com/Miniim98/MiniProject2/Chat"
 	"google.golang.org/grpc"
@@ -92,9 +92,10 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 	}
 
 	//When client is connected this is broadcasted to all connected clients
+	timeNow := Time.time
 	for _, c := range clients {
 		Time.UpTimestamp()
-		err := c.stream_out.Send(&pb.BroadcastResponse{Message: ">> " + in.UserName + " has joined the chat", Timestamp: Time.time})
+		err := c.stream_out.Send(&pb.BroadcastResponse{Message: ">> " + in.UserName + " has joined the chat", Timestamp: timeNow})
 		if err != nil {
 			log.Printf("Error when sending message to %v Error : %v", c.username, err)
 		}
@@ -104,9 +105,10 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 	//Streaming serverside to broadcast
 	for {
 		msg := <-s.ch
+		timeNow = Time.time
 		for _, c := range clients {
 			Time.UpTimestamp()
-			err := c.stream_out.Send(&pb.BroadcastResponse{Message: ">> " + msg, Timestamp: Time.time})
+			err := c.stream_out.Send(&pb.BroadcastResponse{Message: ">> " + msg, Timestamp: timeNow})
 			if err != nil {
 				log.Printf("Error when sending message to %v Error : %v", c.username, err)
 			}
@@ -135,7 +137,6 @@ func main() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve gRPC server over port 8008: %v", err)
 	}
-
 }
 
 func SetUpLog() {
