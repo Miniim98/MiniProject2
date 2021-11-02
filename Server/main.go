@@ -83,7 +83,7 @@ func (server *server) Leave(req *pb.LeaveRequest){
 	req.UserName.conn.Close()
 
 	for i, client := range clients {
-		client.stream_out.Send(pb.LeaveResponse{Message: req.UserName + "has left the chat", Timestamp: &pb.LamportTimeStamp{Events: 1}}, nil
+		client.stream_out.Send(&pb.LeaveResponse{Message: req.UserName + "has left the chat", Timestamp: &pb.LamportTimeStamp{Events: 1}}, nil
 	}
 }
 
