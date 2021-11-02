@@ -108,6 +108,9 @@ func SendPublishRequest(c pb.ChittychatClient) {
 			log.Println("Error during reading input")
 		}
 		msg := scanner.Text()
+		if msg == "" {
+			break
+		}
 		Time.UpTimestamp()
 		log.Printf("Calling Publish at time %d", Time.time)
 		//Calling Publish / opening stream
