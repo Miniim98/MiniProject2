@@ -83,7 +83,7 @@ func SendConnectRequest(c pb.ChittychatClient) {
 	go SendPublishRequest(c)
 	HandleInterrupt(c)
 
-	for { 
+	for {
 
 	}
 
@@ -149,8 +149,8 @@ func SendBroadcastRequest(c pb.ChittychatClient) {
 }
 
 func SendLeaveRequest(client pb.ChittychatClient) {
-	_, err := client.Leave(context.Background(), &pb.LeaveRequest{UserName: name, Timestamp: &pb.LamportTimeStamp{Events: 1}})
-	if (err != nil) {
+	_, err := client.Leave(context.Background(), &pb.LeaveRequest{UserName: name, Timestamp: Time.time})
+	if err != nil {
 		fmt.Printf("Trouble sending leave request: %v", err)
 	}
 }

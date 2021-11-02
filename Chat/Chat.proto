@@ -49,11 +49,11 @@ message LamportTimeStamp {
 
 message LeaveRequest {
     string userName = 1;
-    LamportTimeStamp timestamp = 2;
+    int32 timestamp = 2;
 }
 
 message LeaveResponse {
     bool succes = 1;
-    LamportTimeStamp timestamp = 2;
+    int32 timestamp = 2;
 }
 
