@@ -1,44 +1,43 @@
 syntax = "proto3";
 package Chat;
 
-option go_package = "https://"github.com/Miniim98/MiniProject2/Chat"";
+option go_package = "https://github.com/Miniim98/MiniProject2/Chat";
 
 service Chittychat{
-    rpc Broadcast(BroadcastRequest) returns (BroadcastResponse){}
-    rpc Publish(PublishRequest) returns (PublishResponse){}
+
     rpc Connect(ConnectionRequest) returns (ConnectionResponse){}
-   
+    rpc Publish(stream PublishRequest) returns (PublishResponse){}
+    rpc Broadcast(BroadcastRequest) returns (stream BroadcastResponse){}
+          
 }
 
 message ConnectionRequest {
     string userName = 1;
+    int32 timestamp = 2;
 }
 
 message ConnectionResponse {
     bool succeded = 1;
-    LamportTimeStamp timestamp = 2;
+    int32 timestamp = 2;
 }
 
 message BroadcastRequest {
-    string message = 1;
-    LamportTimeStamp timestamp = 2;
+    string userName = 1;
+    int32 timestamp = 2;
 }
 
 message BroadcastResponse {
-    bool succeded = 1;
-    LamportTimeStamp timestamp = 2;
+    string message = 1;
+    int32 timestamp = 2;
 }
 
 message PublishRequest {
     string message = 1;
-    LamportTimeStamp timestamp = 2;
+    string userName = 2;
+    int32 timestamp = 3;
 }
 
 message PublishResponse {
     bool succeded = 1;
-    LamportTimeStamp timestamp = 2;
-}
-
-message LamportTimeStamp {
-    int32 events = 1;
+    int32 timestamp = 2;
 }
