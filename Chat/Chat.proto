@@ -8,6 +8,7 @@ service Chittychat{
     rpc Connect(ConnectionRequest) returns (ConnectionResponse){}
     rpc Publish(stream PublishRequest) returns (PublishResponse){}
     rpc Broadcast(BroadcastRequest) returns (stream BroadcastResponse){}
+    rpc Leave(LeaveRequest) returns (LeaveResponse){}
           
 }
 
@@ -41,3 +42,18 @@ message PublishResponse {
     bool succeded = 1;
     int32 timestamp = 2;
 }
+
+message LamportTimeStamp {
+    int32 events = 1;
+}
+
+message LeaveRequest {
+    string userName = 1;
+    LamportTimeStamp timestamp = 2;
+}
+
+message LeaveResponse {
+    bool succes = 1;
+    LamportTimeStamp timestamp = 2;
+}
+

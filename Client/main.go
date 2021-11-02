@@ -7,6 +7,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"os/signal"
+	"syscall"
+
+	//"net"
 	"sync"
 
 	pb "github.com/Miniim98/MiniProject2/Chat"
@@ -76,8 +81,9 @@ func SendConnectRequest(c pb.ChittychatClient) {
 	//Go rutines for the chat application
 	go SendBroadcastRequest(c)
 	go SendPublishRequest(c)
+	HandleInterrupt(c)
 
-	for {
+	for { 
 
 	}
 
@@ -140,4 +146,22 @@ func SendBroadcastRequest(c pb.ChittychatClient) {
 		}
 		fmt.Println(response.Message + " at lamporttime " + fmt.Sprint(Time.time))
 	}
+}
+
+func SendLeaveRequest(client pb.ChittychatClient) {
+	_, err := client.Leave(context.Background(), &pb.LeaveRequest{UserName: name, Timestamp: &pb.LamportTimeStamp{Events: 1}})
+	if (err != nil) {
+		fmt.Printf("Trouble sending leave request: %v", err)
+	}
+}
+
+func HandleInterrupt(client pb.ChittychatClient) {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+	go func() {
+		<-c
+		SendLeaveRequest(client)
+		os.Exit(0)
+	}()
+
 }
