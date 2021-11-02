@@ -94,18 +94,8 @@ func SendBroadcastRequest(c pb.ChittychatClient) {
 }
 
 func SendLeaveRequest(client pb.ChittychatClient) {
-	stream, err := client.Leave(context.Background(), &pb.LeaveRequest{UserName: name, Timestamp: &pb.LamportTimeStamp{Events: 1}})
+	_, err := client.Leave(context.Background(), &pb.LeaveRequest{UserName: name, Timestamp: pb.LamportTimeStamp{Events: 1}})
 	if (err != nil) {
-		fmt.Printf("Error occured during transmission of request: %v", err)
-	}
-	for {
-		response, err := stream.Recv()
-		if (err != nil) {
-			fmt.Print("Error occured during transmission of response: %v", err)
-		}
-	}
-
-	if (response.Message) {
-
+		fmt.Print("Trouble sending leave request: %v", err)
 	}
 }

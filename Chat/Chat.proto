@@ -52,6 +52,6 @@ message LeaveRequest {
 }
 
 message LeaveResponse {
-    bool succeded = 1;
+    string message = 1;
     LamportTimeStamp timestamp = 2;
 }
