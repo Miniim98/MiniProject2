@@ -1,8 +1,9 @@
 FROM golang:1.17-alpine AS base
 RUN mkdir /app
-ADD /Client /app
-ADD /Chat /app
+ADD /Client /app/Client
+ADD /Chat /app/Chat
 ADD go.mod /app
-WORKDIR /app
+ADD go.sum /app
+WORKDIR /app/Client
 RUN go build -o main .
-CMD ["/app/main"]
+CMD ["/app/Client/main"]
