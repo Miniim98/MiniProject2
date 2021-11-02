@@ -13,34 +13,31 @@ service Chittychat{
 
 message ConnectionRequest {
     string userName = 1;
+    int32 timestamp = 2;
 }
 
 message ConnectionResponse {
     bool succeded = 1;
-    LamportTimeStamp timestamp = 2;
+    int32 timestamp = 2;
 }
 
 message BroadcastRequest {
     string userName = 1;
-    LamportTimeStamp timestamp = 2;
+    int32 timestamp = 2;
 }
 
 message BroadcastResponse {
     string message = 1;
-    LamportTimeStamp timestamp = 2;
+    int32 timestamp = 2;
 }
 
 message PublishRequest {
     string message = 1;
     string userName = 2;
-    LamportTimeStamp timestamp = 3;
+    int32 timestamp = 3;
 }
 
 message PublishResponse {
     bool succeded = 1;
-    LamportTimeStamp timestamp = 2;
-}
-
-message LamportTimeStamp {
-    int32 events = 1;
+    int32 timestamp = 2;
 }

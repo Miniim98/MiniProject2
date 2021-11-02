@@ -2,19 +2,25 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
+	"sync"
 
 	pb "github.com/Miniim98/MiniProject2/Chat"
 	"google.golang.org/grpc"
 )
 
 type server struct {
-	timestamp int32
-	ch        chan string
+	ch chan string
 	pb.UnimplementedChittychatServer
 }
+
+type timestamp struct {
+	time int32
+	mu   sync.Mutex
+}
+
+var Time timestamp
 
 type Client struct {
 	username   string
@@ -22,25 +28,40 @@ type Client struct {
 	stream_out pb.Chittychat_BroadcastServer
 }
 
+func (c *timestamp) UpTimestamp() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	Time.time++
+}
+
 var clients []Client
 
 func (s *server) Connect(ctx context.Context, in *pb.ConnectionRequest) (*pb.ConnectionResponse, error) {
+	if Time.time < in.Timestamp {
+		Time.time = in.Timestamp
+	}
+	Time.UpTimestamp()
+	log.Printf("Recived ConnectRequest from %v at time %d", in.UserName, Time.time)
 	// saving the client to the client slice
 	clients = append(clients, Client{username: in.UserName})
-	return &pb.ConnectionResponse{Succeded: true, Timestamp: &pb.LamportTimeStamp{Events: 1}}, nil
+	return &pb.ConnectionResponse{Succeded: true, Timestamp: Time.time}, nil
 }
 
 func (s *server) Publish(stream pb.Chittychat_PublishServer) error {
 	//Streaming clientside to recived publish
 	for {
 		msg, err := stream.Recv()
+		if Time.time < msg.Timestamp {
+			Time.time = msg.Timestamp
+		}
+		Time.UpTimestamp()
+		log.Printf("Recived Message from %v at time %d", msg.UserName, Time.time)
 		//Saving the stream_in
 		for i := 0; i < len(clients); i++ {
 			if clients[i].username == msg.UserName {
 				clients[i].stream_in = stream
 			}
 		}
-
 		if err != nil {
 			return err
 		}
@@ -49,6 +70,12 @@ func (s *server) Publish(stream pb.Chittychat_PublishServer) error {
 }
 
 func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_BroadcastServer) error {
+
+	if Time.time < in.Timestamp {
+		Time.time = in.Timestamp
+	}
+	Time.UpTimestamp()
+	log.Printf("Recived BroadcastRequest from %v at time %d", in.UserName, Time.time)
 	//Saving the stream_out to the right client
 	for i := 0; i < len(clients); i++ {
 		if clients[i].username == in.UserName {
@@ -57,23 +84,30 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 	}
 	//When client is connected this is broadcasted to all connected clients
 	for _, c := range clients {
-		c.stream_out.Send(&pb.BroadcastResponse{Message: in.UserName + " has joined the chat", Timestamp: &pb.LamportTimeStamp{Events: 1}})
+		Time.UpTimestamp()
+		err := c.stream_out.Send(&pb.BroadcastResponse{Message: ">> " + in.UserName + " has joined the chat", Timestamp: Time.time})
+		if err != nil {
+			log.Printf("Error when sending message to %v Error : %v", c.username, err)
+		}
+		log.Printf("Send welcome message to %v at time %d", in.UserName, Time.time)
 	}
+
 	//Streaming serverside to broadcast
 	for {
 		msg := <-s.ch
 		for _, c := range clients {
-			err := c.stream_out.Send(&pb.BroadcastResponse{Message: msg, Timestamp: &pb.LamportTimeStamp{Events: 1}})
+			Time.UpTimestamp()
+			err := c.stream_out.Send(&pb.BroadcastResponse{Message: ">> " + msg, Timestamp: Time.time})
 			if err != nil {
-				fmt.Printf("Error when sending message to %v Error : %v", c.username, err)
+				log.Printf("Error when sending message to %v Error : %v", c.username, err)
 			}
+			log.Printf("Send BroadCast to %v at time %d", in.UserName, Time.time)
 		}
-
 	}
-
 }
 
 func main() {
+
 	//We listen on port 8008:
 	lis, err := net.Listen("tcp", ":8008")
 	if err != nil {
@@ -86,8 +120,8 @@ func main() {
 	grpcServer := grpc.NewServer(opts...)
 
 	//register the chittychat server to be the one we have just created
-	pb.RegisterChittychatServer(grpcServer, &server{timestamp: 0, ch: make(chan string)})
-
+	pb.RegisterChittychatServer(grpcServer, &server{ch: make(chan string)})
+	Time.time = 0
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve gRPC server over port 8008: %v", err)
 	}

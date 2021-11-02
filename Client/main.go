@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	//"net"
+	"sync"
 
 	pb "github.com/Miniim98/MiniProject2/Chat"
 	"google.golang.org/grpc"
@@ -17,7 +16,21 @@ import (
 var name string
 var tcpServer = flag.String("server", ":8008", "Tcp server")
 
+type timestamp struct {
+	time int32
+	mu   sync.Mutex
+}
+
+var Time timestamp
+
+func (c *timestamp) UpTimestamp() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	Time.time++
+}
+
 func main() {
+	Time.time = 0
 	//Dialing the server
 	flag.Parse()
 	var opts []grpc.DialOption
@@ -32,6 +45,7 @@ func main() {
 	c := pb.NewChittychatClient(conn)
 	//Calling SendConnectRequest that then calls the others
 	SendConnectRequest(c)
+
 }
 
 func SendConnectRequest(c pb.ChittychatClient) {
@@ -39,11 +53,14 @@ func SendConnectRequest(c pb.ChittychatClient) {
 	fmt.Println("Choose a username")
 	fmt.Scanln(&name)
 	//Calling Connect
-	response, err := c.Connect(context.Background(), &pb.ConnectionRequest{UserName: name})
+	Time.UpTimestamp()
+	log.Printf("calling Connect to server at time %d", Time.time)
+	response, err := c.Connect(context.Background(), &pb.ConnectionRequest{UserName: name, Timestamp: Time.time})
 	if err != nil {
 		fmt.Printf("Failure trying to call Connect %v", err)
 		fmt.Println(response)
 	}
+
 	//Go rutines for the chat application
 	go SendBroadcastRequest(c)
 	go SendPublishRequest(c)
@@ -55,23 +72,26 @@ func SendConnectRequest(c pb.ChittychatClient) {
 }
 
 func SendPublishRequest(c pb.ChittychatClient) {
-
 	for {
 		//Reading input
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
 		if scanner.Err() != nil {
-			fmt.Println("Error during reading input")
+			log.Println("Error during reading input")
 		}
 		msg := scanner.Text()
+		Time.UpTimestamp()
+		log.Printf("Calling Publish at time %d", Time.time)
 		//Calling Publish / opening stream
 		stream, err := c.Publish(context.Background())
 		if err != nil {
-			fmt.Printf("Error calling Publish : %v", err)
+			log.Printf("Error calling Publish : %v", err)
 		}
 		//Sending message through stream
-		if err := stream.Send(&pb.PublishRequest{Message: msg, UserName: name, Timestamp: &pb.LamportTimeStamp{Events: 1}}); err != nil {
-			fmt.Printf("Error sending stream to Publish : %v", err)
+		Time.UpTimestamp()
+		log.Printf("Sending message to server through stream at time %d", Time.time)
+		if err := stream.Send(&pb.PublishRequest{Message: msg, UserName: name, Timestamp: Time.time}); err != nil {
+			log.Printf("Error sending stream to Publish : %v", err)
 		}
 
 	}
@@ -79,16 +99,23 @@ func SendPublishRequest(c pb.ChittychatClient) {
 
 func SendBroadcastRequest(c pb.ChittychatClient) {
 	//Opening stream
-	stream, err := c.Broadcast(context.Background(), &pb.BroadcastRequest{UserName: name, Timestamp: &pb.LamportTimeStamp{Events: 1}})
+	Time.UpTimestamp()
+	log.Printf("Calling broadcast at time %d", Time.time)
+	stream, err := c.Broadcast(context.Background(), &pb.BroadcastRequest{UserName: name, Timestamp: Time.time})
 	if err != nil {
 		fmt.Printf("Error calling Broadcast : %v", err)
 	}
 	//Listening and reciving messeges
 	for {
 		response, err := stream.Recv()
+		if Time.time < response.Timestamp {
+			Time.time = response.Timestamp
+		}
+		Time.UpTimestamp()
+		log.Printf("Reciving %v at time %d", response.Message, Time.time)
 		if err != nil {
 			fmt.Printf("Error when reciving messages: %v", err)
 		}
-		fmt.Println(response.Message + " at lamporttime " + response.Timestamp.String())
+		fmt.Println(response.Message + " at lamporttime " + fmt.Sprint(Time.time))
 	}
 }
