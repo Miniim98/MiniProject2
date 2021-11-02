@@ -41,6 +41,13 @@ func (s *server) Connect(ctx context.Context, in *pb.ConnectionRequest) (*pb.Con
 		Time.time = in.Timestamp
 	}
 	Time.UpTimestamp()
+	if !(len(clients) == 0) {
+		for _, c := range clients {
+			if c.username == in.UserName {
+				return &pb.ConnectionResponse{Succeded: false, Timestamp: Time.time}, nil
+			}
+		}
+	}
 	log.Printf("Recived ConnectRequest from %v at time %d", in.UserName, Time.time)
 	// saving the client to the client slice
 	clients = append(clients, Client{username: in.UserName})
@@ -82,6 +89,7 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 			clients[i].stream_out = stream
 		}
 	}
+
 	//When client is connected this is broadcasted to all connected clients
 	for _, c := range clients {
 		Time.UpTimestamp()
@@ -89,7 +97,7 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 		if err != nil {
 			log.Printf("Error when sending message to %v Error : %v", c.username, err)
 		}
-		log.Printf("Send welcome message to %v at time %d", in.UserName, Time.time)
+		log.Printf("Send welcome message to %v at time %d", c.username, Time.time)
 	}
 
 	//Streaming serverside to broadcast
@@ -101,12 +109,13 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 			if err != nil {
 				log.Printf("Error when sending message to %v Error : %v", c.username, err)
 			}
-			log.Printf("Send BroadCast to %v at time %d", in.UserName, Time.time)
+			log.Printf("Send BroadCast to %v at time %d", c.username, Time.time)
 		}
 	}
 }
 
 func main() {
+	Time.time = 0
 
 	//We listen on port 8008:
 	lis, err := net.Listen("tcp", ":8008")
@@ -121,7 +130,7 @@ func main() {
 
 	//register the chittychat server to be the one we have just created
 	pb.RegisterChittychatServer(grpcServer, &server{ch: make(chan string)})
-	Time.time = 0
+
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve gRPC server over port 8008: %v", err)
 	}

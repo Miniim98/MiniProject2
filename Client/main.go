@@ -60,6 +60,19 @@ func SendConnectRequest(c pb.ChittychatClient) {
 		fmt.Printf("Failure trying to call Connect %v", err)
 		fmt.Println(response)
 	}
+	var succes bool
+	succes = response.Succeded
+	for !succes {
+		fmt.Println("Username is taken. Please choose another")
+		fmt.Scanln(&name)
+		response, err := c.Connect(context.Background(), &pb.ConnectionRequest{UserName: name, Timestamp: Time.time})
+		if err != nil {
+			fmt.Printf("Failure trying to call Connect %v", err)
+			fmt.Println(response)
+		}
+		succes = response.Succeded
+
+	}
 
 	//Go rutines for the chat application
 	go SendBroadcastRequest(c)
