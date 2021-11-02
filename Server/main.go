@@ -59,9 +59,13 @@ func (s *server) Publish(stream pb.Chittychat_PublishServer) error {
 	//Streaming clientside to recived publish
 	for {
 		msg, err := stream.Recv()
+		if err != nil {
+			return err
+		}
 		if Time.time < msg.Timestamp {
 			Time.time = msg.Timestamp
 		}
+
 		Time.UpTimestamp()
 		log.Printf("Recived Message from %v at time %d", msg.UserName, Time.time)
 		//Saving the stream_in
@@ -69,9 +73,6 @@ func (s *server) Publish(stream pb.Chittychat_PublishServer) error {
 			if clients[i].username == msg.UserName {
 				clients[i].stream_in = stream
 			}
-		}
-		if err != nil {
-			return err
 		}
 		s.ch <- msg.UserName + ": " + msg.Message
 	}
