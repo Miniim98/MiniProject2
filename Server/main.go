@@ -73,18 +73,20 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 
 }
 
-func (server *server) Leave(req *pb.LeaveRequest){
+func (server *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.LeaveResponse, error) {
 	for i, toRemove:= range clients {
-		if toRemove == req.UserName {
+		if toRemove.username == req.UserName {
 			clients = append(clients[:i], clients[i+1:]...)
 		}
 	}
 
-	req.UserName.conn.Close()
+	server.ch <- req.UserName + "has left the chat"
+	
+	return &pb.LeaveResponse{Succes: true, Timestamp: &pb.LamportTimeStamp{Events: 1}}, nil
 
-	for i, client := range clients {
-		client.stream_out.Send(&pb.LeaveResponse{Message: req.UserName + "has left the chat", Timestamp: &pb.LamportTimeStamp{Events: 1}}, nil
-	}
+	/*for _, client := range clients {
+		client.stream_leave.Send(&pb.LeaveResponse{Message: req.UserName + "has left the chat", Timestamp: &pb.LamportTimeStamp{Events: 1}})
+	}*/
 }
 
 func main() {
