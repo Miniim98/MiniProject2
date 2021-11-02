@@ -73,6 +73,10 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 
 }
 
+func Leave() {
+	
+}
+
 func main() {
 	//We listen on port 8008:
 	lis, err := net.Listen("tcp", ":8008")
