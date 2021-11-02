@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"sync"
+	"os"
 
 	pb "github.com/Miniim98/MiniProject2/Chat"
 	"google.golang.org/grpc"
@@ -107,7 +108,7 @@ func (s *server) Broadcast(in *pb.BroadcastRequest, stream pb.Chittychat_Broadca
 }
 
 func main() {
-
+	SetUpLog()
 	//We listen on port 8008:
 	lis, err := net.Listen("tcp", ":8008")
 	if err != nil {
@@ -126,4 +127,14 @@ func main() {
 		log.Fatalf("failed to serve gRPC server over port 8008: %v", err)
 	}
 
+}
+
+func SetUpLog() {
+	var filename = "log"
+	LOG_FILE := filename
+	logFile, err := os.OpenFile(LOG_FILE, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		log.Panic(err)
+	}
+	log.SetOutput(logFile)
 }
