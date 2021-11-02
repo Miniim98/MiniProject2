@@ -147,7 +147,7 @@ func SendBroadcastRequest(c pb.ChittychatClient) {
 		if err != nil {
 			log.Printf("Error when reciving messages: %v", err)
 		}
-		fmt.Println(response.Message + " at lamporttime " + fmt.Sprint(Time.time))
+		fmt.Printf("LamportTime %d %v", Time.time, response.Message)
 	}
 }
 
