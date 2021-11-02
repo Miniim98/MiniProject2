@@ -57,8 +57,7 @@ func SendConnectRequest(c pb.ChittychatClient) {
 	log.Printf("calling Connect to server at time %d", Time.time)
 	response, err := c.Connect(context.Background(), &pb.ConnectionRequest{UserName: name, Timestamp: Time.time})
 	if err != nil {
-		fmt.Printf("Failure trying to call Connect %v", err)
-		fmt.Println(response)
+		log.Printf("Failure trying to call Connect %v", err)
 	}
 	var succes bool
 	succes = response.Succeded
@@ -67,8 +66,7 @@ func SendConnectRequest(c pb.ChittychatClient) {
 		fmt.Scanln(&name)
 		response, err := c.Connect(context.Background(), &pb.ConnectionRequest{UserName: name, Timestamp: Time.time})
 		if err != nil {
-			fmt.Printf("Failure trying to call Connect %v", err)
-			fmt.Println(response)
+			log.Printf("Failure trying to call Connect %v", err)
 		}
 		succes = response.Succeded
 
@@ -116,7 +114,7 @@ func SendBroadcastRequest(c pb.ChittychatClient) {
 	log.Printf("Calling broadcast at time %d", Time.time)
 	stream, err := c.Broadcast(context.Background(), &pb.BroadcastRequest{UserName: name, Timestamp: Time.time})
 	if err != nil {
-		fmt.Printf("Error calling Broadcast : %v", err)
+		log.Printf("Error calling Broadcast : %v", err)
 	}
 	//Listening and reciving messeges
 	for {
@@ -127,7 +125,7 @@ func SendBroadcastRequest(c pb.ChittychatClient) {
 		Time.UpTimestamp()
 		log.Printf("Reciving %v at time %d", response.Message, Time.time)
 		if err != nil {
-			fmt.Printf("Error when reciving messages: %v", err)
+			log.Printf("Error when reciving messages: %v", err)
 		}
 		fmt.Println(response.Message + " at lamporttime " + fmt.Sprint(Time.time))
 	}
